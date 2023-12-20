@@ -11,9 +11,9 @@ jobs:
       postgres:
         image: postgres:13
         env:
-          POSTGRES_USER: foodgramm_user
-          POSTGRES_PASSWORD: foodgramm_password
-          POSTGRES_DB: foodgramm
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         ports:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
@@ -32,12 +32,12 @@ jobs:
       - name: Test with flake8
         env:
           DEBUG: False
-          ALLOWED_HOSTS: 51.250.109.25 127.0.0.1 foodgramm.viewdns.net
-          POSTGRES_USER: foodgramm_user
-          POSTGRES_PASSWORD: foodgramm_password
-          POSTGRES_DB: foodgramm
-          DB_HOST: db
-          DB_PORT: 5432
+          ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
         run: |
           python -m flake8 backend/foodgramm_backend/
 
@@ -151,4 +151,4 @@ jobs:
       with:
         to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
-        message: Деплой ${{ github.repository }} успешно выполнен!
+        message: Деплой успешно выполнен!
