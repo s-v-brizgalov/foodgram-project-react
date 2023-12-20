@@ -59,7 +59,7 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram:latest
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/front:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/frontend:latest
             sudo docker-compose stop
             sudo docker-compose rm backend
             touch .env
