@@ -90,23 +90,23 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
-      - name: Copy docker-compose.production.yml via ssh
+      - name: Copy docker-compose.yml via ssh
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
-          source: "docker-compose.production.yml"
+          source: "docker-compose.yml"
           target: "ffoodgram_project_react"
           script: |
             cd foodgram_project_react
-            sudo docker compose -f docker-compose.production.yml pull
-            sudo docker compose -f docker-compose.production.yml down
-            sudo docker compose -f docker-compose.production.yml up -d
-            sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
-            sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
-            sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/static_backend/. /backend_static/static/
+            sudo docker compose -f docker-compose.yml pull
+            sudo docker compose -f docker-compose.yml down
+            sudo docker compose -f docker-compose.yml up -d
+            sudo docker compose -f docker-compose.yml exec backend python manage.py migrate
+            sudo docker compose -f docker-compose.yml exec backend python manage.py collectstatic
+            sudo docker compose -f docker-compose.yml exec backend cp -r /app/static_backend/. /backend_static/static/
 
 
   send_message:
