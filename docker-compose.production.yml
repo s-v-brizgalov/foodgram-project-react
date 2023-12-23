@@ -1,0 +1,43 @@
+version: '3.3'
+
+services:
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - db_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+ 
+  backend:  
+    image: svbrizgalov/foodgram_project_backend
+    env_file: .env
+    depends_on:
+      - db
+    volumes:
+      - static:/backend_static 
+      - media:/app/media
+
+  frontend:
+    image: svbrizgalov/foodgram_project_frontend
+    command: cp -r /app/build/. /frontend_static/
+    volumes:
+      - ./frontend/:/app/result_build/
+    depends_on:
+      - backend
+ 
+  gateway:
+    image: svbrizgalov/foodgram_project_gateway
+    env_file: .env
+    ports:
+      - 8000:80
+    volumes:
+      - static:/staticfiles/
+      - media:/app/media/
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  db_data:
+  static:
+  media:
