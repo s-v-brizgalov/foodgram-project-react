@@ -92,9 +92,8 @@ jobs:
         uses: actions/checkout@v3
       - name: Copy docker-compose.yml via ssh
         uses: appleboy/scp-action@master
-        # uses: appleboy/ssh-action@master
         with:
-          host: 158.160.24.32
+          host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
