@@ -100,7 +100,7 @@ jobs:
           source: "docker-compose.yml"
           target: "foodgram_project_react"
           script: |
-            cd foodgram
+            cd foodgram_project_react
             sudo docker compose -f docker-compose.yml pull
             sudo docker compose -f docker-compose.yml down
             sudo docker compose -f docker-compose.yml up -d
