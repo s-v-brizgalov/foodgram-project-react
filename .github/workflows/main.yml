@@ -98,7 +98,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           source: "docker-compose.yml"
-          target: "foodgram_project_react"
+          target: "foodgram_project"
           script: |
             cd foodgram_project_react
             sudo docker compose -f docker-compose.yml pull
