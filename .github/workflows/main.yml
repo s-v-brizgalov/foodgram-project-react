@@ -99,7 +99,7 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           source: "docker-compose.yml"
           target: "foodgram_project"
-          script: |
+          huescript: |
             cd foodgram_project_react
             sudo docker compose -f docker-compose.yml pull
             sudo docker compose -f docker-compose.yml down
