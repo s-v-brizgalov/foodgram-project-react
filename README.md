@@ -230,13 +230,16 @@ docker creation
 **Скачать список покупок:**
 
    - GET /api/recipes/download_shopping_cart/
-
-**Проект доступен по адресу:** 
-
-   - https://nikgir.ddns.net
   
   
-
-**Автор бэкэнд:**
+**Автор бэкэнда:**
 
 - Сергей Бризгалов
+
+**Данные пользователя**
+
+Электронная почта: foodgram@foodgram.ru
+Логин: foodgramuser
+Имя: foodgramuser
+Фамилия: foodgramuser
+password: 1q2w3e1q2w3e
