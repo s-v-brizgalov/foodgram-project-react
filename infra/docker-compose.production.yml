@@ -9,7 +9,7 @@ services:
     env_file:
       - ./.env
   backend:
-    build: ../backend/
+    image: svbrizgalov/foodgram_backend:latest
     restart: always
     volumes:
       - data:/app/data/
@@ -21,9 +21,7 @@ services:
     env_file:
       - ./.env
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: svbrizgalov/foodgram_frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
   nginx:
