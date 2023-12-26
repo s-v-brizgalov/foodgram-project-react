@@ -231,12 +231,6 @@ docker creation
 
    - GET /api/recipes/download_shopping_cart/
 
-**Проект доступен по адресу:** 
-
-   - https://nikgir.ddns.net
-  
-  
-
-**Автор бэкэнд:**
+**Автор бэкэнда:**
 
 - Сергей Бризгалов
