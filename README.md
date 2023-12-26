@@ -236,10 +236,14 @@ docker creation
 
 - Сергей Бризгалов
 
-**Данные пользователя**
+**Данные для входа в админку:**
 
-Электронная почта: foodgram@foodgram.ru
-Логин: foodgramuser
-Имя: foodgramuser
-Фамилия: foodgramuser
-password: 1q2w3e1q2w3e
+- Электронная почта: foodgram@foodgram.ru
+- Логин: foodgramuser
+- Имя: foodgramuser
+- Фамилия: foodgramuser
+- password: 1q2w3e1q2w3e
+
+**Адрес:**
+
+-brizgalov.ru
