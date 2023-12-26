@@ -1,45 +1,53 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models import UniqueConstraint
+
+from .validators import validate_username
 
 
 class User(AbstractUser):
-    """Кастомный класс пользователей"""
+    """ Кастомная модель пользователя. """
+
+    email = models.EmailField('Почта', max_length=254, unique=True)
+    first_name = models.CharField('Имя', max_length=150, blank=False)
+    last_name = models.CharField('Фамилия', max_length=150, blank=False)
     username = models.CharField(
+        'Юзернейм',
         max_length=150,
-        unique=True,
-        verbose_name='Логин'
-    )
-    email = models.EmailField(
-        max_length=254,
-        unique=True,
-        verbose_name='EMAIL'
-    )
-    first_name = models.CharField(max_length=150, verbose_name='Имя')
-    last_name = models.CharField(max_length=150, verbose_name='Фамилие')
-    password = models.CharField(max_length=150, verbose_name='Пароль')
+        validators=[validate_username])
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
+        ordering = ['-pk']
 
     def __str__(self):
-        return f'{self.username}'
+        return self.username
 
 
-class Subscriptions(models.Model):
-    """Подписка"""
-    author = models.ForeignKey(
-        User, on_delete=models.CASCADE,
-        verbose_name='Автор', related_name='following'
-    )
+class Subscription(models.Model):
+    """ Модель подписок. """
+
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE,
-        verbose_name='Пользователь', related_name='follow'
+        User,
+        related_name='follower',
+        on_delete=models.CASCADE,
+        verbose_name='Подписчик'
+    )
+    author = models.ForeignKey(
+        User,
+        related_name='author',
+        on_delete=models.CASCADE,
+        verbose_name='Автор'
     )
 
     class Meta:
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'
+        constraints = [
+            UniqueConstraint(
+                fields=['user', 'author'],
+                name='user_author_unique'
+            )
+        ]
 
     def __str__(self):
-        return f'{self.user} - {self.author}'
+        return f'Пользователь {self.user} подписался на {self.author}'
