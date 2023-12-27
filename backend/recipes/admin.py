@@ -15,7 +15,7 @@ class RecipeIngredientInline(admin.TabularInline):
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'measurement_unit')
     list_filter = ('name', )
-    list_per_page = settings.L_P_P
+    list_per_page = settings.PAGE
     search_fields = ('name', )
     empty_value_display = '-пусто-'
 
@@ -45,7 +45,7 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
         'ingredient',
         'amount')
     empty_value_display = '-пусто-'
-    list_per_page = settings.L_P_P
+    list_per_page = settings.PAGE
 
 
 @admin.register(Tag)
@@ -53,7 +53,7 @@ class TagAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'color', 'slug')
     empty_value_display = '-пусто-'
     list_filter = ('name', )
-    list_per_page = settings.L_P_P
+    list_per_page = settings.PAGE
     search_fields = ('name', )
     prepopulated_fields = {'slug': ('name',)}
 
@@ -87,7 +87,7 @@ class ShoppingAdmin(admin.ModelAdmin):
     list_display = ('id', 'get_shopping')
     list_filter = ('recipe', )
     search_fields = ('recipe__name', )
-    list_per_page = settings.L_P_P
+    list_per_page = settings.PAGE
 
     def get_shopping(self, obj):
         return (f'"{obj.recipe}" добавлен в покупки '
