@@ -1,6 +1,6 @@
 ![example workflow](https://github.com/s-v-brizgalov/foodgram-project-react/actions/workflows/main.yml/badge.svg)
 
-# Проект Foodgram, "Продуктовый помощник"
+# Проект Foodgram, "Продуктовый помощник."
 
 <p><a href="https://www.python.org/" rel="nofollow"><img src="https://camo.githubusercontent.com/938bc97e6c0351babffcd724243f78c6654833e451efc6ce3f5d66a635727a9c/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f2d507974686f6e2d3436343634363f3f7374796c653d666c61742d737175617265266c6f676f3d507974686f6e" alt="Python" data-canonical-src="https://img.shields.io/badge/-Python-464646??style=flat-square&amp;logo=Python" style="max-width:100%;"></a>
 <a href="https://www.djangoproject.com/" rel="nofollow"><img src="https://camo.githubusercontent.com/99e48bebd1b4c03828d16f8625f34439aa7d298ea573dd4e209ea593a769bd06/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f2d446a616e676f2d3436343634363f3f7374796c653d666c61742d737175617265266c6f676f3d446a616e676f" alt="Django" data-canonical-src="https://img.shields.io/badge/-Django-464646??style=flat-square&amp;logo=Django" style="max-width:100%;"></a>
@@ -11,13 +11,13 @@
 <a href="https://github.com/features/actions"><img src="https://camo.githubusercontent.com/b70fe9e64e76d385b8cae9b6366dfba69af953e85d16cf43bb1f9d46fefb1621/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f2d476974487562253230416374696f6e732d3436343634363f3f7374796c653d666c61742d737175617265266c6f676f3d476974487562253230616374696f6e73" alt="GitHub%20Actions" data-canonical-src="https://img.shields.io/badge/-GitHub%20Actions-464646??style=flat-square&amp;logo=GitHub%20actions" style="max-width:100%;"></a>
 <a href="https://nginx.org/ru/" rel="nofollow"><img src="https://camo.githubusercontent.com/b9f9edede39c7f898e25e81ce431f7c4b8d0b375c05768fd6916e599fcba219f/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f2d4e47494e582d3436343634363f3f7374796c653d666c61742d737175617265266c6f676f3d4e47494e58" alt="NGINX" data-canonical-src="https://img.shields.io/badge/-NGINX-464646??style=flat-square&amp;logo=NGINX" style="max-width:100%;"></a></p>
 
-**Описание**
+**Описание.**
 
 Онлайн-сервис Foodgram и API для него.Имеется реализация CI/CD проекта.На этом сервисе пользователи могут публиковать рецепты, подписываться на публикации других пользователей, добавлять понравившиеся рецепты в список "Избранное", а перед походом в магазин скачивать сводный список продуктов, необходимых для приготовления одного или нескольких выбранных блюд.
 
   
 
-**Доступный функционал**
+**Доступный функционал.**
 
 Аутентификация реализована с помощью стандартного модуля DRF - Authtoken.
 
@@ -41,9 +41,9 @@
 
 Возможность скачать список покупок в PDF формате.
 
-# Установка на удалённом сервере
+# Установка на удалённом сервере.
 
-**Выполнить вход на удаленный сервер**
+**Выполнить вход на удаленный сервер.**
 
 **Установить docker:**
 
@@ -114,7 +114,7 @@
 
 - sudo docker compose -f docker-compose.production.yml  exec -it backend python manage.py createsuperuser
 
-# Примеры некоторых запросов API
+# Примеры некоторых запросов API.
 
 **Регистрация пользователя:**
 
@@ -158,11 +158,8 @@
 **Данные для входа в админку:**
 
 - Электронная почта: foodgram@foodgram.ru
-- Логин: foodgramuser
-- Имя: foodgramuser
-- Фамилия: foodgramuser
 - password: 1q2w3e1q2w3e
 
-**Адрес:**
+**Проект доступен по адресу:**
 
 - brizgalov.ru
