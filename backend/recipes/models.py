@@ -6,7 +6,7 @@ from users.models import User
 
 
 class Ingredient(models.Model):
-    """Класс интредиент"""
+    """Класс ингредиент"""
 
     name = models.CharField(
         verbose_name='Наименование ингредиента',

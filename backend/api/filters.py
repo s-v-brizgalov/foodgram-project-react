@@ -15,10 +15,11 @@ class IngredientSearchFilter(SearchFilter):
 
 class RecipeFilter(django_filters.FilterSet):
     name = django_filters.CharFilter(lookup_expr='icontains', label='Название')
-    author = django_filters.CharFilter(field_name='author__username',
-                                       label='Автор')
-    tags = django_filters.CharFilter(field_name='tags__slug', label='Тег')
+    is_favorited = django_filters.BooleanFilter(method='get_is_favorited')
+    is_in_shopping_cart = django_filters.BooleanFilter(
+        method='get_is_in_shopping_cart'
+    )
 
     class Meta:
         model = Recipe
-        fields = []
+        fields = ('tags', 'author', 'is_favorited', 'is_in_shopping_cart',)

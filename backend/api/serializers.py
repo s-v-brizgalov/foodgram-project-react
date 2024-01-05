@@ -24,7 +24,6 @@ class CustomUserSerializer(UserSerializer):
         user = self.context['request'].user
         if user.is_anonymous:
             return False
-
         return Follow.objects.filter(follower=user, author=obj).exists()
 
 
@@ -90,7 +89,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeIngredientsSerializer(serializers.ModelSerializer):
-    '''Сериализатор рецепт-ингтредиент.'''
+    '''Сериализатор рецепт-ингредиент.'''
 
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
@@ -151,34 +150,65 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
-        name = data.get('name')
-        if len(name) > 254:
-            raise serializers.ValidationError(
-                'Превышен размер имени'
+        noingredients = data.get('ingredients')
+        ingredient_ids = [item['id'] for item in noingredients]
+        if not Ingredient.objects.filter(id__in=ingredient_ids).exists():
+            invalid_ingredients = (
+                set(ingredient_ids) - set(Ingredient.objects.values_list(
+                    'id', flat=True
+                ))
             )
-        ingredients = data.get('ingredients')
-        ingredients_list = [ingredient.get('id') for ingredient in ingredients]
-        count = Ingredient.objects.count()
+            raise serializers.ValidationError(
+                {
+                    'ingredients': [
+                        f'Ингредиента с id - {ingredient_id} нет'
+                        for ingredient_id in invalid_ingredients
+                    ]
+                }
+            )
+        tags = self.initial_data.get('tags')
+        if not tags:
+            raise serializers.ValidationError({
+                'tags': 'Тег обязателен для заполнения!'
+            })
+        tags_set = set()
+        for tag in tags:
+            if tag in tags_set:
+                raise serializers.ValidationError({
+                    'tags': f'Тег {tag} уже существует, внесите новый!'
+                })
+            tags_set.add(tag)
+        cooking_time = self.initial_data.get('cooking_time')
+        if int(cooking_time) <= 0:
+            raise serializers.ValidationError(
+                'Время приготовления должно быть больше 0'
+            )
+        ingredients = self.initial_data.get('ingredients')
+        if not ingredients:
+            raise serializers.ValidationError(
+                'Поле с ингредиентами не может быть пустым'
+            )
+        image = self.initial_data.get('image')
+        if not image:
+            raise serializers.ValidationError(
+                'Нужна картинка'
+            )
+        unique_ingredients = []
         for ingredient in ingredients:
-            if ingredient.get('id') > count:
+            id_ingredient = ingredient['id']
+            if int(ingredient['amount']) <= 0:
                 raise serializers.ValidationError(
-                    'Отсутствует ингредиент!'
+                    f'Некорректное количество для {id_ingredient}'
                 )
-            if ingredients_list.count(ingredient['id']) > 1:
-                duble = Ingredient.objects.get(
-                    pk=ingredient.get('id')
-                )
+            if not isinstance(int(ingredient['amount']), int):
                 raise serializers.ValidationError(
-                    f'Ингредиент, {duble}, '
-                    f'выбран более одного раза.'
+                    'Количество ингредиентов должно быть целым числом'
                 )
-            if ingredient.get('amount') <= 0:
-                zero = Ingredient.objects.get(
-                    pk=ingredient.get('id')
-                )
+            if id_ingredient not in unique_ingredients:
+                unique_ingredients.append(id_ingredient)
+            else:
                 raise serializers.ValidationError(
-                    f'Количество ингредиента, {zero}, '
-                    f'0 или меньше'
+                    'В рецепте не может быть повторяющихся ингредиентов'
                 )
         return data
 
@@ -277,7 +307,11 @@ class FollowShowSerializer(serializers.ModelSerializer):
         return ShortRecipeSerializer
 
     def get_recipes(self, object):
+        request = self.context.get('request')
         author_recipes = object.recipes.all()
+        recipes_limit = request.query_params.get('recipes_limit')
+        if recipes_limit:
+            author_recipes = author_recipes[:int(recipes_limit)]
         return ShortRecipeSerializer(author_recipes, many=True).data
 
     def get_recipes_count(self, object):
