@@ -149,7 +149,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = '__all__'
 
-    def the_validate(self, data):
+    def validate(self, data):
         noingredients = data.get('ingredients')
         ingredient_ids = [item['id'] for item in noingredients]
         if not Ingredient.objects.filter(id__in=ingredient_ids).exists():
