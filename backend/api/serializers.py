@@ -153,19 +153,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         noingredients = data.get('ingredients')
         ingredient_ids = [item['id'] for item in noingredients]
         if not Ingredient.objects.filter(id__in=ingredient_ids).exists():
-            invalid_ingredients = (
-                set(ingredient_ids) - set(Ingredient.objects.values_list(
-                    'id', flat=True
-                ))
-            )
-            raise serializers.ValidationError(
-                {
-                    'ingredients': [
-                        f'Ингредиента с id - {ingredient_id} нет'
-                        for ingredient_id in invalid_ingredients
-                    ]
-                }
-            )
+            raise serializers.ValidationError('Из этого не готовят!')
         tags = self.initial_data.get('tags')
         if not tags:
             raise serializers.ValidationError({
@@ -178,11 +166,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                     'tags': f'Тег {tag} уже существует, внесите новый!'
                 })
             tags_set.add(tag)
-        cooking_time = self.initial_data.get('cooking_time')
-        if int(cooking_time) <= 0:
-            raise serializers.ValidationError(
-                'Время приготовления должно быть больше 0'
-            )
         ingredients = self.initial_data.get('ingredients')
         if not ingredients:
             raise serializers.ValidationError(

@@ -146,6 +146,7 @@ class IngredientViewSet(ListViewSet):
     search_fields = ('^name', )
     pagination_class = None
     permission_classes = [IsAuthenticatedOrReadOnly]
+    http_method_names = ['get']
 
 
 class TagViewSet(ListViewSet):
@@ -155,13 +156,14 @@ class TagViewSet(ListViewSet):
     serializer_class = TagSerializer
     pagination_class = None
     permission_classes = [IsAuthenticatedOrReadOnly]
+    http_method_names = ['get']
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     '''Рецепты'''
 
     pagination_class = CustomPagination
-    permission_classes = (IsAuthorOrAdminOrReadOnly | IsAdminOrReadOnly,)
+    permission_classes = (IsAuthorOrAdminOrReadOnly,)
 
     def get_queryset(self):
         queryset = Recipe.objects.all()
