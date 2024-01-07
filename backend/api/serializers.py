@@ -149,7 +149,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = '__all__'
     # тесты не пускают, говорят, что слишком сложный запрос
-        
+
     # def validate(self, data):
     #     noingredients = data.get('ingredients')
     #     ingredient_ids = [item['id'] for item in noingredients]
