@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
+from rest_framework.exceptions import NotAuthenticated
 from rest_framework.validators import UniqueTogetherValidator
 from recipes.models import Ingredient, Follow, Recipe, RecipeIngredient, Tag
 from users.models import User
@@ -150,56 +151,57 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
     # тесты не пускают, говорят, что слишком сложный запрос
 
-    # def validate(self, data):
-    #     noingredients = data.get('ingredients')
-    #     ingredient_ids = [item['id'] for item in noingredients]
-    #     if not Ingredient.objects.filter(id__in=ingredient_ids).exists():
-    #         raise serializers.ValidationError('Из этого не готовят!')
-    #     tags = self.initial_data.get('tags')
-    #     if not tags:
-    #         raise serializers.ValidationError({
-    #             'tags': 'Тег обязателен для заполнения!'
-    #         })
-    #     tags_set = set()
-    #     for tag in tags:
-    #         if tag in tags_set:
-    #             raise serializers.ValidationError({
-    #                 'tags': f'Тег {tag} уже существует, внесите новый!'
-    #             })
-    #         tags_set.add(tag)
-    #     cooking_time = self.initial_data.get('cooking_time')
-    #     if int(cooking_time) <= 0:
-    #         raise serializers.ValidationError(
-    #             'Время приготовления должно быть больше 0'
-    #         )
-    #     ingredients = self.initial_data.get('ingredients')
-    #     if not ingredients:
-    #         raise serializers.ValidationError(
-    #             'Поле с ингредиентами не может быть пустым'
-    #         )
-    #     image = self.initial_data.get('image')
-    #     if not image:
-    #         raise serializers.ValidationError(
-    #             'Нужна картинка'
-    #         )
-    #     unique_ingredients = []
-    #     for ingredient in ingredients:
-    #         id_ingredient = ingredient['id']
-    #         if int(ingredient['amount']) <= 0:
-    #             raise serializers.ValidationError(
-    #                 f'Некорректное количество для {id_ingredient}'
-    #             )
-    #         if not isinstance(int(ingredient['amount']), int):
-    #             raise serializers.ValidationError(
-    #                 'Количество ингредиентов должно быть целым числом'
-    #             )
-    #         if id_ingredient not in unique_ingredients:
-    #             unique_ingredients.append(id_ingredient)
-    #         else:
-    #             raise serializers.ValidationError(
-    #                 'В рецепте не может быть повторяющихся ингредиентов'
-    #             )
-    #     return data
+    def validate(self, data):
+        x_ingredients = data.get('ingredients')
+        x_ids = [item['id'] for item in x_ingredients]
+        if not Ingredient.objects.filter(id__in=x_ids).exists():
+            raise serializers.ValidationError('Из этого не готовят.')
+        tags = self.initial_data.get('tags')
+        if not tags:
+            raise serializers.ValidationError({
+                'tags': 'Тег обязателен для заполнения.'
+            })
+        tags_set = set()
+        for tag in tags:
+            if tag in tags_set:
+                raise serializers.ValidationError({
+                    'tags': f'Тег {tag} уже существует, внесите новый.'
+                })
+            tags_set.add(tag)
+        cooking_time = self.initial_data.get('cooking_time')
+        if int(cooking_time) <= 0:
+            raise serializers.ValidationError(
+                'Время приготовления должно быть больше 0'
+            )
+        image = self.initial_data.get('image')
+        if not image:
+            raise serializers.ValidationError(
+                'Нужна картинка'
+            )
+
+        ingredients = self.initial_data.get('ingredients')
+        if not ingredients:
+            raise serializers.ValidationError(
+                'Поле с ингредиентами не может быть пустым'
+            )
+        unique_ingredients = []
+        for ingredient in ingredients:
+            id_ingredient = ingredient['id']
+            if int(ingredient['amount']) <= 0:
+                raise serializers.ValidationError(
+                    f'Некорректное количество для {id_ingredient}'
+                )
+            if not isinstance(int(ingredient['amount']), int):
+                raise serializers.ValidationError(
+                    'Количество ингредиентов должно быть целым числом'
+                )
+            if id_ingredient not in unique_ingredients:
+                unique_ingredients.append(id_ingredient)
+            else:
+                raise serializers.ValidationError(
+                    'В рецепте не может быть повторяющихся ингредиентов'
+                )
+        return data
 
     def create_ingredients(self, recipe, ingredients):
         ingredients_list = []
@@ -213,6 +215,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         RecipeIngredient.objects.bulk_create(ingredients_list)
 
     def create(self, validated_data):
+        user = self.context['request'].user
+        if user.is_anonymous:
+            raise NotAuthenticated('нинада')
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
