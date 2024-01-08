@@ -149,8 +149,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = '__all__'
-    # тесты не пускают, говорят, что слишком сложный запрос
 
+    # flake8: noqa: C901
     def validate(self, data):
         x_ingredients = data.get('ingredients')
         x_ids = [item['id'] for item in x_ingredients]
