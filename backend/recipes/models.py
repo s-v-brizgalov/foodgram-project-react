@@ -1,8 +1,12 @@
 from colorfield.fields import ColorField
-from django.core.validators import MinValueValidator, RegexValidator
+from django.core.validators import (
+    MinValueValidator,
+    MaxValueValidator
+)
 from django.db import models
 
 from users.models import User
+from foodgram.settings import MAX_LEN_TITLE, MIN_AMOUNT, MAX_AMOUNT
 
 
 class Ingredient(models.Model):
@@ -10,12 +14,12 @@ class Ingredient(models.Model):
 
     name = models.CharField(
         verbose_name='Наименование ингредиента',
-        max_length=150,
+        max_length=MAX_LEN_TITLE,
         help_text='Наименование ингредиента',
     )
     measurement_unit = models.CharField(
         verbose_name='Единица измерения',
-        max_length=150,
+        max_length=MAX_LEN_TITLE,
         help_text='Единица измерения',
     )
 
@@ -23,6 +27,12 @@ class Ingredient(models.Model):
         ordering = ('name',)
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
+        constraints = [
+            models.UniqueConstraint(
+                fields=('name', 'measurement_unit'),
+                name='unique_ingredient_unit'
+            )
+        ]
 
     def __str__(self):
         return self.name
@@ -46,13 +56,8 @@ class Tag(models.Model):
         help_text='Цвет в формате HEX кода',
     )
     slug = models.SlugField(
-        max_length=50,
         verbose_name='slug',
-        unique=True,
-        validators=[RegexValidator(
-            regex=r'^[-a-zA-Z0-9_]+$',
-            message='Использован недопустимый символ'
-        )]
+        unique=True
     )
 
     class Meta:
@@ -76,7 +81,7 @@ class Recipe(models.Model):
     )
     name = models.CharField(
         verbose_name='Название рецепта',
-        max_length=150,
+        max_length=MAX_LEN_TITLE,
         help_text='Название рецепта',
     )
     image = models.ImageField(
@@ -104,10 +109,10 @@ class Recipe(models.Model):
     cooking_time = models.IntegerField(
         verbose_name='Время приготовления',
         validators=[
-            MinValueValidator(
-                1,
-                message='Минимальное время приготовления 1 мин.'
-            )
+            MinValueValidator(limit_value=MIN_AMOUNT,
+                              message=f'min {MIN_AMOUNT}'),
+            MaxValueValidator(limit_value=MAX_AMOUNT,
+                              message=f'max {MAX_AMOUNT}'),
         ],
         help_text='Время приготовления',
     )
@@ -118,7 +123,7 @@ class Recipe(models.Model):
     )
 
     class Meta:
-        ordering = ('-pub_date', )
+        ordering = ('-pub_date',)
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
 
@@ -147,9 +152,11 @@ class RecipeIngredient(models.Model):
         verbose_name='Количество',
         validators=[
             MinValueValidator(
-                1,
-                message='Минимальное количество 1'
-            )
+                limit_value=MIN_AMOUNT,
+                message=f'min {MIN_AMOUNT}'),
+            MaxValueValidator(
+                limit_value=MAX_AMOUNT,
+                message=f'max {MAX_AMOUNT}'),
         ],
         help_text='Количество',
     )
@@ -188,7 +195,7 @@ class Follow(models.Model):
     )
 
     class Meta:
-        ordering = ('-id',)
+        ordering = ('author',)
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
         constraints = [
@@ -221,7 +228,6 @@ class FavoriteRecipe(models.Model):
     )
 
     class Meta:
-        ordering = ('id',)
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные рецепты'
         constraints = [
@@ -254,7 +260,6 @@ class ShoppingCart(models.Model):
     )
 
     class Meta:
-        ordering = ('id',)
         verbose_name = 'Покупка'
         verbose_name_plural = 'Покупки'
         constraints = [

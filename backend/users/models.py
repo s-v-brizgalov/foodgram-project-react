@@ -4,7 +4,7 @@ from django.db import models
 
 
 class User(AbstractUser):
-    '''Модель пользователя'''
+    """Модель пользователя"""
 
     email = models.EmailField(
         verbose_name='Электронная почта',
@@ -19,8 +19,9 @@ class User(AbstractUser):
         unique=True,
         db_index=True,
         validators=[RegexValidator(
-            regex=r'^[\w.@+-]+$',
-            message='В имени использованы запрещенные символы'
+            regex=r'^(?i)(?!.*\bme\b)[\w.@+-]+$',
+            message='Использованы запрещенные символы '
+            'или особо запрещенное имя *me*'
         )]
     )
     first_name = models.CharField(

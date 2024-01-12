@@ -66,10 +66,10 @@ TEMPLATES = [
 WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 # DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
+    # 'default': {
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': BASE_DIR / 'db.sqlite3',
+    # }
 # }
 
 DATABASES = {
@@ -151,3 +151,6 @@ DJOSER = {
 }
 
 PAGE = 10
+MIN_AMOUNT = 1
+MAX_AMOUNT = 1000
+MAX_LEN_TITLE = 200
