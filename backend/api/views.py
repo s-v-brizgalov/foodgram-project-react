@@ -1,31 +1,51 @@
 from django.http import FileResponse
-from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from djoser import views
+from recipes.models import Follow, Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
-from rest_framework.permissions import (
-    AllowAny,
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly
-)
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 
-from recipes.models import (Ingredient, FavoriteRecipe, Follow,
-                            Recipe, RecipeIngredient, ShoppingCart, Tag)
+from api.filters import IngredientSearchFilter, RecipeFilter
+from api.pagination import CustomPagination
+from api.permissions import IsAuthorOrAdminOrReadOnly
+from api.serializers import (
+    CustomUserSerializer, FavoriteCreateDeleteSerializer,
+    FollowSerializer, FollowShowSerializer,
+    GetTokenSerializer, IngredientSerializer,
+    RecipeCreateSerializer, RecipeListSerializer,
+    ShoppingCartCreateDeleteSerializer, TagSerializer)
+from api.utils import forming_pdf
 from users.models import User
 
-from .filters import IngredientSearchFilter, RecipeFilter
-from .pagination import CustomPagination
-from .permissions import IsAuthorOrAdminOrReadOnly
-from .serializers import (CustomUserSerializer, IngredientSerializer,
-                          FollowSerializer, FollowShowSerializer,
-                          GetTokenSerializer,
-                          RecipeCreateSerializer, RecipeListSerializer,
-                          ShortRecipeSerializer, TagSerializer)
-from .utils import post, forming_pdf
+
+class BaseRelationsViewSet:
+    def relation_create(self, request, serializer_class, data):
+        serializer = serializer_class(data=data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def relation_delete(self, request, serializer_class,
+                        user_id, target_id, target_type):
+        serializer = serializer_class()
+        if target_type == 'author':
+            serializer.validate_for_delete(
+                user_id=user_id, author_id=target_id)
+            serializer.Meta.model.objects.filter(
+                user_id=user_id, author_id=target_id).delete()
+        elif target_type == 'recipe':
+            serializer.validate_for_delete(
+                user_id=user_id, recipe_id=target_id)
+            serializer.Meta.model.objects.filter(
+                user_id=user_id, recipe_id=target_id).delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class AuthToken(ObtainAuthToken):
@@ -149,7 +169,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
 
-class RecipeViewSet(viewsets.ModelViewSet):
+class RecipeViewSet(BaseRelationsViewSet, viewsets.ModelViewSet):
     """Рецепты."""
     queryset = Recipe.objects.all()
     pagination_class = CustomPagination
@@ -162,89 +182,45 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeListSerializer
         return RecipeCreateSerializer
 
-    def update(self, request, *args, **kwargs):  # лишний метод
-        """Обновление рецепта."""
-        instance = self.get_object()
-        serializer = self.get_serializer(
-            instance,
-            data=request.data,
-            partial=True
-        )
-        if 'ingredients' not in request.data:
-            return Response(
-                {'ingredients': ['This field is required.']},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-    @staticmethod
-    def delete(request, pk, get_object, models):
-        obj = get_object_or_404(get_object, id=pk)
-        if not models.objects.filter(recipe=obj, user=request.user).exists():
-            return Response({'message':
-                             f'Нет добавленных рецептов{obj}.'})
-        models.objects.filter(
-            recipe=obj, user=request.user
-        ).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(
-        detail=True,
-        methods=['POST', 'DELETE'],
-        permission_classes=[IsAuthenticated]
-    )
+    @action(methods=['post'], detail=True,
+            permission_classes=[IsAuthenticated])
     def favorite(self, request, pk=None):
-        if request.method == 'POST':
-            if not (Recipe.objects.filter(id=pk).first()):
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-            return post(
-                request, pk, Recipe,
-                FavoriteRecipe, ShortRecipeSerializer
-            )
-        get_object_or_404(Recipe, id=pk)
-        user_id = request.user.id
-        delete_cnt, _ = FavoriteRecipe.objects.filter(
-            user__id=user_id,
-            recipe__id=pk
-        ).delete()
-        if not delete_cnt:
-            return Response(
-                {'subcribe': 'Нет избранного.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        data = {'user': request.user.id, 'recipe': pk}
+        return self.relation_create(
+            request,
+            FavoriteCreateDeleteSerializer,
+            data
+        )
 
-    @action(
-        detail=True,
-        methods=['POST', 'DELETE'],
-        permission_classes=[IsAuthenticated]
-    )
+    @favorite.mapping.delete
+    def delete_favorite(self, request, pk=None):
+        return self.relation_delete(
+            request,
+            FavoriteCreateDeleteSerializer,
+            user_id=request.user.id,
+            target_id=pk,
+            target_type='recipe'
+        )
+
+    @action(methods=['post'], detail=True,
+            permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
-        if request.method == 'POST':
-            if not (Recipe.objects.filter(id=pk).first()):
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-            return post(
-                request, pk, Recipe,
-                ShoppingCart, ShortRecipeSerializer
-            )
-        get_object_or_404(ShoppingCart, recipe_id=pk)
-        delete_cnt, _ = ShoppingCart.objects.filter(
-            user__id=request.user.id,
-            recipe__id=pk
-        ).delete()
-        if not delete_cnt:
-            return Response(
-                {'subcribe': 'Нет покупок.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        data = {'user': request.user.id, 'recipe': pk}
+        return self.relation_create(
+            request,
+            ShoppingCartCreateDeleteSerializer,
+            data
+        )
+
+    @shopping_cart.mapping.delete
+    def delete_shopping_cart(self, request, pk=None):
+        return self.relation_delete(
+            request,
+            ShoppingCartCreateDeleteSerializer,
+            user_id=request.user.id,
+            target_id=pk,
+            target_type='recipe'
+        )
 
     @action(
         detail=False,

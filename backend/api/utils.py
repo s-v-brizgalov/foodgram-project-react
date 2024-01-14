@@ -1,24 +1,8 @@
 import io
 
-from django.shortcuts import get_object_or_404
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
-from rest_framework import status
-from rest_framework.response import Response
-
-
-def post(request, pk, get_object, models, serializer):
-    obj = get_object_or_404(get_object, id=pk)
-    if models.objects.filter(recipe=obj, user=request.user).exists():
-        return Response(
-            {'message':
-                f'Рецепт уже добавлен {obj}.'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-    serializer = serializer(obj, context={request: 'request'})
-    models.objects.create(recipe=obj, user=request.user)
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 def forming_pdf(ingredients):

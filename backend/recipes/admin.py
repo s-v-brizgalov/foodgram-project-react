@@ -1,6 +1,6 @@
-from django.conf import settings
 from django.contrib import admin
 
+from api.constant import PAGE
 from .models import (FavoriteRecipe, Follow, Ingredient, Recipe,
                      RecipeIngredient, ShoppingCart, Tag)
 
@@ -15,7 +15,7 @@ class RecipeIngredientInline(admin.TabularInline):
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'measurement_unit')
     list_filter = ('name', )
-    list_per_page = settings.PAGE
+    list_per_page = PAGE
     search_fields = ('name', )
     empty_value_display = '-пусто-'
 
@@ -45,7 +45,7 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
         'ingredient',
         'amount')
     empty_value_display = '-пусто-'
-    list_per_page = settings.PAGE
+    list_per_page = PAGE
 
 
 @admin.register(Tag)
@@ -53,7 +53,7 @@ class TagAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'color', 'slug')
     empty_value_display = '-пусто-'
     list_filter = ('name', )
-    list_per_page = settings.PAGE
+    list_per_page = PAGE
     search_fields = ('name', )
     prepopulated_fields = {'slug': ('name',)}
 
@@ -87,7 +87,7 @@ class ShoppingAdmin(admin.ModelAdmin):
     list_display = ('id', 'get_shopping')
     list_filter = ('recipe', )
     search_fields = ('recipe__name', )
-    list_per_page = settings.PAGE
+    list_per_page = PAGE
 
     def get_shopping(self, obj):
         return (f'"{obj.recipe}" добавлен в покупки '

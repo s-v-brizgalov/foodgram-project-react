@@ -4,9 +4,9 @@ from django.core.validators import (
     MaxValueValidator
 )
 from django.db import models
+from api.constant import MAX_LEN_TITLE, MIN_AMOUNT, MAX_AMOUNT
 
 from users.models import User
-from foodgram.settings import MAX_LEN_TITLE, MIN_AMOUNT, MAX_AMOUNT
 
 
 class Ingredient(models.Model):
@@ -106,7 +106,7 @@ class Recipe(models.Model):
         related_name='recipes',
         help_text='Тег рецепта',
     )
-    cooking_time = models.IntegerField(
+    cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления',
         validators=[
             MinValueValidator(limit_value=MIN_AMOUNT,
@@ -148,7 +148,7 @@ class RecipeIngredient(models.Model):
         related_name='ingredient',
         help_text='Ингредиент',
     )
-    amount = models.IntegerField(
+    amount = models.PositiveSmallIntegerField(
         verbose_name='Количество',
         validators=[
             MinValueValidator(
@@ -209,8 +209,8 @@ class Follow(models.Model):
         return f'{self.follower} подписался на: {self.author}'
 
 
-class FavoriteRecipe(models.Model):
-    """Класс избранное"""
+class AbstractFavoriteShopping(models.Model):
+    """Абстрактный класс избранного и покупок."""
 
     user = models.ForeignKey(
         User,
@@ -228,11 +228,13 @@ class FavoriteRecipe(models.Model):
     )
 
     class Meta:
+        ordering = ('recipe',)
+        abstract = True
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные рецепты'
         constraints = [
             models.UniqueConstraint(
-                fields=('user', 'recipe', ),
+                fields=('user', 'recipe',),
                 name='unique_favorite',
             ),
         ]
@@ -241,13 +243,16 @@ class FavoriteRecipe(models.Model):
         return f'{self.recipe} добавлен в избранное'
 
 
-class ShoppingCart(models.Model):
-    """Класс покупок"""
+class FavoriteRecipe(AbstractFavoriteShopping):
+    """Класс избранное."""
+
+
+class ShoppingCart(AbstractFavoriteShopping):
+    """Класс покупок."""
 
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name='Пользователь',
         related_name='shopping',
         help_text='Пользователь добавивший покупки',
     )
@@ -264,7 +269,7 @@ class ShoppingCart(models.Model):
         verbose_name_plural = 'Покупки'
         constraints = [
             models.UniqueConstraint(
-                fields=('user', 'recipe', ),
+                fields=('user', 'recipe',),
                 name='unique_shopping',
             ),
         ]
