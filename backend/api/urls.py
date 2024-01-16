@@ -24,13 +24,6 @@ urlpatterns = [
             ]
         ),
     ),
-    path(
-        '',
-        include(
-            [
-                path('', include(router.urls)),
-                path('', include('djoser.urls')),
-            ]
-        ),
-    )
+    path('', include(router.urls)),
+    path('', include('djoser.urls')),
 ]

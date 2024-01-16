@@ -38,17 +38,10 @@ class BaseRelationsViewSet:
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def relation_delete(self, request, serializer_class,
-                        user_id, target_id, target_type):
-        if serializer_class == FavoriteCreateDeleteSerializer:
-            target = FavoriteRecipe
-        else:
-            target = ShoppingCart
-        exist_target = target.objects.filter(
-            user_id=user_id, recipe_id=target_id
-        )
-        if exist_target:
-            exist_target.delete()
+    def relation_delete(self, request, model, pk):
+        to_delete = model.objects.filter(pk=pk)
+        if to_delete:
+            to_delete.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(
             {'error': 'Нельзя удалить то, чего нет'},
@@ -115,7 +108,8 @@ class CustomUserViewSet(views.UserViewSet):
         author = get_object_or_404(User, id=id)
         if request.method == 'POST':
             serializer = FollowSerializer(
-                data={'follower': request.user.id, 'author': author.id}
+                data={'follower': request.user.id, 'author': author.id},
+                context={'request': request}
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -202,10 +196,8 @@ class RecipeViewSet(BaseRelationsViewSet, viewsets.ModelViewSet):
     def delete_favorite(self, request, pk=None):
         return self.relation_delete(
             request,
-            FavoriteCreateDeleteSerializer,
-            user_id=request.user.id,
-            target_id=pk,
-            target_type='recipe'
+            FavoriteRecipe,
+            pk
         )
 
     @action(methods=['post'], detail=True,
@@ -221,10 +213,8 @@ class RecipeViewSet(BaseRelationsViewSet, viewsets.ModelViewSet):
     def delete_shopping_cart(self, request, pk=None):
         return self.relation_delete(
             request,
-            ShoppingCartCreateDeleteSerializer,
-            user_id=request.user.id,
-            target_id=pk,
-            target_type='recipe'
+            ShoppingCart,
+            pk
         )
 
     @action(

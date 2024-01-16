@@ -12,3 +12,5 @@ MAX_LEN_TITLE = 200
 MAX_LEN_NAME = 150
 # Максимальная длина пароля
 MAX_LEN_PASSWORD = 150
+# Длина поля цвет
+LEN_COLOR = 7

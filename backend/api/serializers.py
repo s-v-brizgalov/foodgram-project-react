@@ -14,11 +14,13 @@ from users.models import User
 class CustomUserSerializer(UserSerializer):
     """Сериализатор пользователей."""
 
+    is_subscribed = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = (
             'email', 'id', 'username',
-            'first_name', 'last_name'
+            'first_name', 'last_name', 'is_subscribed'
         )
 
     def get_is_subscribed(self, obj):
@@ -178,7 +180,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         ingredients = data.get('ingredients')
-        if ingredients is None:
+        if not ingredients:
             raise ParseError('Ингредиентов нет совсем.')
         tags = data.get('tags')
         if not tags:
@@ -260,9 +262,9 @@ class FollowSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         return FollowShowSerializer(
-            instance,
+            instance.author,
             context={
-                'request': self.context['request']
+                'request': self.context
             }).data
 
 
@@ -274,7 +276,7 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
-class FollowShowSerializer(serializers.ModelSerializer):
+class FollowShowSerializer(CustomUserSerializer):
     """Сериализатор списка подписок."""
 
     recipes = serializers.SerializerMethodField(method_name='get_recipes')
@@ -284,8 +286,7 @@ class FollowShowSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'email',
-                  'recipes', 'recipes_count')
+        fields = ('recipes', 'recipes_count')
 
     def get_recipes(self, object):
         request = self.context.get('request')

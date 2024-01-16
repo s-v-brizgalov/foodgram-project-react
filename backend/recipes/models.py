@@ -2,7 +2,7 @@ from colorfield.fields import ColorField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from api.constant import MAX_AMOUNT, MAX_LEN_TITLE, MIN_AMOUNT
+from api.constant import LEN_COLOR, MAX_AMOUNT, MAX_LEN_NAME, MAX_LEN_TITLE, MIN_AMOUNT
 from users.models import User
 
 
@@ -39,7 +39,7 @@ class Tag(models.Model):
     """Класс тег"""
 
     name = models.CharField(
-        max_length=50,
+        max_length=MAX_LEN_NAME,
         verbose_name='Hазвание',
         unique=True,
         db_index=True
@@ -47,7 +47,7 @@ class Tag(models.Model):
 
     color = ColorField(
         default='#17A400',
-        max_length=7,
+        max_length=LEN_COLOR,
         verbose_name='Цвет',
         unique=True,
         help_text='Цвет в формате HEX кода',
@@ -231,7 +231,7 @@ class AbstractFavoriteShopping(models.Model):
 class FavoriteRecipe(AbstractFavoriteShopping):
     """Класс избранное."""
 
-    class Meta:
+    class Meta(AbstractFavoriteShopping.Meta):
         default_related_name = 'favorite'
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные рецепты'
@@ -246,7 +246,7 @@ class FavoriteRecipe(AbstractFavoriteShopping):
 class ShoppingCart(AbstractFavoriteShopping):
     """Класс покупок."""
 
-    class Meta:
+    class Meta(AbstractFavoriteShopping.Meta):
         default_related_name = 'shopping'
         verbose_name = 'Покупка'
         verbose_name_plural = 'Покупки'
