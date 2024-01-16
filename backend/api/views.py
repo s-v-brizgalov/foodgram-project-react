@@ -31,7 +31,8 @@ from users.models import User
 
 class BaseRelationsViewSet:
 
-    def relation_create(self, request, serializer_class, data):
+    def relation_create(self, request, serializer_class, pk):
+        data = {'user': request.user.id, 'recipe': pk}
         serializer = serializer_class(data=data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -194,11 +195,11 @@ class RecipeViewSet(BaseRelationsViewSet, viewsets.ModelViewSet):
     @action(methods=['post'], detail=True,
             permission_classes=[IsAuthenticated])
     def favorite(self, request, pk=None):
-        data = {'user': request.user.id, 'recipe': pk}  # to relation_create
+
         return self.relation_create(
             request,
             FavoriteCreateDeleteSerializer,
-            data
+            pk
         )
 
     @favorite.mapping.delete
@@ -214,11 +215,10 @@ class RecipeViewSet(BaseRelationsViewSet, viewsets.ModelViewSet):
     @action(methods=['post'], detail=True,
             permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
-        data = {'user': request.user.id, 'recipe': pk}
         return self.relation_create(
             request,
             ShoppingCartCreateDeleteSerializer,
-            data
+            pk
         )
 
     @shopping_cart.mapping.delete

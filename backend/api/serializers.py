@@ -177,10 +177,10 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
-        if data.get('ingredients') is None:
+        ingredients = data.get('ingredients')
+        if ingredients is None:
             raise ParseError('Ингредиентов нет совсем.')
-        tags = self.initial_data.get('tags')  # <---
-        # Тут и ниже в методе, достаем по ключам не из initial_data, а из data
+        tags = data.get('tags')
         if not tags:
             raise serializers.ValidationError({
                 'tags': 'Тег обязателен для заполнения.'
@@ -189,12 +189,11 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 'tags': 'Тег уже существует, внесите новый.'
             })
-        image = self.initial_data.get('image')
+        image = data.get('image')
         if not image:
             raise serializers.ValidationError(
                 'Нужна картинка.'
             )
-        ingredients = self.initial_data.get('ingredients')
         ingredient_id = [item['id'] for item in ingredients]
         if len(ingredient_id) != len(set(ingredient_id)):
             raise serializers.ValidationError(
