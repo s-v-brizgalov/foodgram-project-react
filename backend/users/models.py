@@ -38,9 +38,6 @@ class User(AbstractUser):
         verbose_name='Пароль',
         max_length=MAX_LEN_PASSWORD,
     )
-    is_subscribed = models.BooleanField(
-        default=False,
-    )
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = 'username', 'first_name', 'last_name'

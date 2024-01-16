@@ -4,7 +4,7 @@ from drf_extra_fields.fields import Base64ImageField
 from recipes.models import (FavoriteRecipe, Follow, Ingredient, Recipe,
                             RecipeIngredient, ShoppingCart, Tag)
 from rest_framework import serializers
-from rest_framework.exceptions import NotFound, ParseError
+from rest_framework.exceptions import ParseError
 from rest_framework.validators import UniqueTogetherValidator
 
 from api.constant import MAX_AMOUNT, MIN_AMOUNT
@@ -14,15 +14,12 @@ from users.models import User
 class CustomUserSerializer(UserSerializer):
     """Сериализатор пользователей."""
 
-    is_subscribed = serializers.SerializerMethodField()
-
     class Meta:
         model = User
         fields = (
             'email', 'id', 'username',
-            'first_name', 'last_name', 'is_subscribed'
+            'first_name', 'last_name'
         )
-    read_only_fields = ("is_subscribed",)
 
     def get_is_subscribed(self, obj):
         return (
@@ -154,14 +151,12 @@ class CreateIngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ingredient
-        fields = (
-            'id', 'amount'
-        )
+        fields = ('id', 'amount')
 
-    def validate(self, data):
-        if not Ingredient.objects.filter(id=data['id']).exists():
+    def validate_id(self, value):
+        if not Ingredient.objects.filter(id=value).exists():
             raise ParseError('Фантастический ингредиент.')
-        return data
+        return value
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
@@ -182,9 +177,10 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
-        if 'ingredients' not in data.keys():
+        if data.get('ingredients') is None:
             raise ParseError('Ингредиентов нет совсем.')
-        tags = self.initial_data.get('tags')
+        tags = self.initial_data.get('tags')  # <---
+        # Тут и ниже в методе, достаем по ключам не из initial_data, а из data
         if not tags:
             raise serializers.ValidationError({
                 'tags': 'Тег обязателен для заполнения.'
@@ -283,7 +279,7 @@ class FollowShowSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'first_name', 'last_name', 'email',
-                  'is_subscribed', 'recipes', 'recipes_count')
+                  'recipes', 'recipes_count')
 
     def get_recipes(self, object):
         request = self.context.get('request')
@@ -303,6 +299,7 @@ class FollowShowSerializer(serializers.ModelSerializer):
 
 class ShoppingCartCreateDeleteSerializer(serializers.ModelSerializer):
     """Общий сериалайзер для избранного и корзины."""
+
     class Meta:
         model = ShoppingCart
         fields = ('user', 'recipe')
@@ -315,16 +312,6 @@ class ShoppingCartCreateDeleteSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Уже добавлен.')
         return data
 
-    def validate_for_delete(self, user_id, recipe_id):
-        if not self.Meta.model.objects.filter(
-                user_id=user_id, recipe_id=recipe_id).exists():
-            raise NotFound()
-
-    def validate_for_delete_non_add(self, user_id, recipe_id):
-        if not self.Meta.model.objects.filter(
-                user_id=user_id, recipe_id=recipe_id).exists():
-            raise ParseError()
-
     def to_representation(self, instance):
         serializer = ShortRecipeSerializer(
             instance.recipe, context=self.context)
@@ -333,5 +320,6 @@ class ShoppingCartCreateDeleteSerializer(serializers.ModelSerializer):
 
 class FavoriteCreateDeleteSerializer(ShoppingCartCreateDeleteSerializer):
     """Сериализатор для избранного."""
+
     class Meta(ShoppingCartCreateDeleteSerializer.Meta):
         model = FavoriteRecipe

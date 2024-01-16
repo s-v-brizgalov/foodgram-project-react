@@ -2,7 +2,7 @@ from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser import views
-from recipes.models import Follow, Ingredient, Recipe, RecipeIngredient, Tag
+from recipes.models import FavoriteRecipe, Follow, Ingredient, Recipe, RecipeIngredient, ShoppingCart, Tag
 from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -25,6 +25,7 @@ from users.models import User
 
 
 class BaseRelationsViewSet:
+
     def relation_create(self, request, serializer_class, data):
         serializer = serializer_class(data=data, context={'request': request})
         serializer.is_valid(raise_exception=True)
@@ -33,19 +34,20 @@ class BaseRelationsViewSet:
 
     def relation_delete(self, request, serializer_class,
                         user_id, target_id, target_type):
-        serializer = serializer_class()
-        if target_type == 'author':
-            serializer.validate_for_delete(
-                user_id=user_id, author_id=target_id)
-            serializer.Meta.model.objects.filter(
-                user_id=user_id, author_id=target_id).delete()
-        elif target_type == 'recipe':
-            serializer.validate_for_delete(
-                user_id=user_id, recipe_id=target_id)
-            serializer.Meta.model.objects.filter(
-                user_id=user_id, recipe_id=target_id).delete()
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        if serializer_class == FavoriteCreateDeleteSerializer:
+            target = FavoriteRecipe
+        else:
+            target = ShoppingCart
+        exist_target = target.objects.filter(
+            user_id=user_id, recipe_id=target_id
+        )
+        if exist_target:
+            exist_target.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {'error': 'Нельзя удалить то, чего нет'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class AuthToken(ObtainAuthToken):
@@ -157,7 +159,6 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = (IngredientSearchFilter, )
     search_fields = ('^name', )
     pagination_class = None
-    permission_classes = [IsAuthenticatedOrReadOnly]
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -166,14 +167,17 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
-    permission_classes = [IsAuthenticatedOrReadOnly]
 
 
 class RecipeViewSet(BaseRelationsViewSet, viewsets.ModelViewSet):
     """Рецепты."""
+
     queryset = Recipe.objects.all()
     pagination_class = CustomPagination
-    permission_classes = (IsAuthorOrAdminOrReadOnly,)
+    permission_classes = (
+        IsAuthenticatedOrReadOnly,
+        IsAuthorOrAdminOrReadOnly
+    )
     filterset_class = RecipeFilter
     filter_backends = (DjangoFilterBackend,)
 
@@ -185,7 +189,7 @@ class RecipeViewSet(BaseRelationsViewSet, viewsets.ModelViewSet):
     @action(methods=['post'], detail=True,
             permission_classes=[IsAuthenticated])
     def favorite(self, request, pk=None):
-        data = {'user': request.user.id, 'recipe': pk}
+        data = {'user': request.user.id, 'recipe': pk}  # to relation_create
         return self.relation_create(
             request,
             FavoriteCreateDeleteSerializer,

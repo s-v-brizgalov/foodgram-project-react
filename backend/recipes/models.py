@@ -1,11 +1,8 @@
 from colorfield.fields import ColorField
-from django.core.validators import (
-    MinValueValidator,
-    MaxValueValidator
-)
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from api.constant import MAX_LEN_TITLE, MIN_AMOUNT, MAX_AMOUNT
 
+from api.constant import MAX_AMOUNT, MAX_LEN_TITLE, MIN_AMOUNT
 from users.models import User
 
 
@@ -216,20 +213,26 @@ class AbstractFavoriteShopping(models.Model):
         User,
         on_delete=models.CASCADE,
         verbose_name='Пользователь',
-        related_name='favorite',
-        help_text='Пользователь добавивший рецепт',
     )
     recipe = models.ForeignKey(
         Recipe,
-        verbose_name='Избранное',
+        verbose_name='Рецепты',
         on_delete=models.CASCADE,
-        related_name='favorite',
-        help_text='Избранный рецепт',
     )
 
     class Meta:
         ordering = ('recipe',)
         abstract = True
+
+    def __str__(self):
+        return f'{self.recipe} добавлен'
+
+
+class FavoriteRecipe(AbstractFavoriteShopping):
+    """Класс избранное."""
+
+    class Meta:
+        default_related_name = 'favorite'
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные рецепты'
         constraints = [
@@ -239,32 +242,12 @@ class AbstractFavoriteShopping(models.Model):
             ),
         ]
 
-    def __str__(self):
-        return f'{self.recipe} добавлен в избранное'
-
-
-class FavoriteRecipe(AbstractFavoriteShopping):
-    """Класс избранное."""
-
 
 class ShoppingCart(AbstractFavoriteShopping):
     """Класс покупок."""
 
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='shopping',
-        help_text='Пользователь добавивший покупки',
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        verbose_name='Покупки',
-        related_name='shopping',
-        help_text='Рецепт для покупок',
-    )
-
     class Meta:
+        default_related_name = 'shopping'
         verbose_name = 'Покупка'
         verbose_name_plural = 'Покупки'
         constraints = [
@@ -273,6 +256,3 @@ class ShoppingCart(AbstractFavoriteShopping):
                 name='unique_shopping',
             ),
         ]
-
-    def __str__(self):
-        return f'{self.recipe} добавлен в покупки.'
