@@ -258,6 +258,13 @@ class FollowSerializer(serializers.ModelSerializer):
             )
         return data
 
+    def to_representation(self, instance):
+        return FollowShowSerializer(
+            instance,
+            context={
+                'request': self.context['request']
+            }).data
+
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
     """Список рецептов в подписке."""
