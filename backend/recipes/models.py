@@ -2,7 +2,8 @@ from colorfield.fields import ColorField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from api.constant import LEN_COLOR, MAX_AMOUNT, MAX_LEN_NAME, MAX_LEN_TITLE, MIN_AMOUNT
+from api.constant import (LEN_COLOR, MAX_AMOUNT, MAX_LEN_NAME, MAX_LEN_TITLE,
+                          MIN_AMOUNT)
 from users.models import User
 
 
