@@ -39,14 +39,8 @@ class BaseRelationsViewSet:
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def relation_delete(self, request, model, pk):
-        to_delete = model.objects.filter(pk=pk)
-        if to_delete:
-            to_delete.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(
-            {'error': 'Нельзя удалить то, чего нет'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        get_object_or_404(model, pk).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class AuthToken(ObtainAuthToken):
