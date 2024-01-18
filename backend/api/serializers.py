@@ -263,7 +263,8 @@ class FollowSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         return FollowShowSerializer(
             instance.author,
-            context=self.context).data
+            context=self.context
+        ).data
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
@@ -284,12 +285,15 @@ class FollowShowSerializer(CustomUserSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'email',
-                  'is_subscribed', 'recipes', 'recipes_count')
+        fields = (
+            'recipes', 'recipes_count',
+            'email', 'id', 'username',
+            'first_name', 'last_name', 'is_subscribed'
+        )
 
     def get_recipes(self, object):
         request = self.context.get('request')
-        author_recipes = object.recipes.all()
+        author_recipes = Recipe.objects.filter(author=object)
         recipes_limit = request.query_params.get('recipes_limit')
         if recipes_limit and recipes_limit.isdigit():
             author_recipes = author_recipes[:int(recipes_limit)]

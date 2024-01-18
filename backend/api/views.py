@@ -39,7 +39,14 @@ class BaseRelationsViewSet:
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def relation_delete(self, request, model, pk):
-        get_object_or_404(model, user=request.user).delete()
+        get_object_or_404(Recipe, id=pk)
+        user_id = request.user.id
+        deletedata, _ = model.objects.filter(
+            user__id=user_id,
+            recipe__id=pk
+        ).delete()
+        if not deletedata:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
