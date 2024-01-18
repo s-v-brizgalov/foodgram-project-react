@@ -66,7 +66,7 @@ class GetTokenSerializer(serializers.Serializer):
                 password=password)
             if not user:
                 raise serializers.ValidationError(
-                    "Невозможно зайти в систему лично табе",
+                    "Невозможно зайти в систему",
                     code='authorization')
         else:
             msg = 'Укажите почту и пароль'
