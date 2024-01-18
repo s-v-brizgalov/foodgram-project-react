@@ -263,9 +263,7 @@ class FollowSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         return FollowShowSerializer(
             instance.author,
-            context={
-                'request': self.context
-            }).data
+            context=self.context).data
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
@@ -286,7 +284,8 @@ class FollowShowSerializer(CustomUserSerializer):
 
     class Meta:
         model = User
-        fields = ('recipes', 'recipes_count')
+        fields = ('id', 'username', 'first_name', 'last_name', 'email',
+                  'is_subscribed', 'recipes', 'recipes_count')
 
     def get_recipes(self, object):
         request = self.context.get('request')
