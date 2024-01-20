@@ -4,12 +4,12 @@ from recipes.models import Tag
 
 
 class Command(BaseCommand):
-    help = 'Тэги'
+    help = 'Теги'
 
     def handle(self, *args, **kwargs):
         data = [
-            {'name': 'Завтрак', 'color': '#008000', 'slug': 'breakfast'},
-            {'name': 'Обед', 'color': '#800000', 'slug': 'lunch'},
-            {'name': 'Ужин', 'color': '#000080', 'slug': 'dinner'}]
+            {'name': 'Завтрак', 'color': '#ffd966', 'slug': 'breakfast'},
+            {'name': 'Обед', 'color': '#4a8685', 'slug': 'lunch'},
+            {'name': 'Ужин', 'color': '#dda3ad', 'slug': 'dinner'}]
         Tag.objects.bulk_create(Tag(**tag) for tag in data)
-        self.stdout.write(self.style.SUCCESS('Тэги успешно загружены!'))
+        self.stdout.write(self.style.SUCCESS('Теги успешно загружены!'))

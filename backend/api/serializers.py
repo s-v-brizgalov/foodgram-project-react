@@ -286,17 +286,18 @@ class FollowShowSerializer(CustomUserSerializer):
     class Meta:
         model = User
         fields = (
-            'recipes', 'recipes_count',
             'email', 'id', 'username',
-            'first_name', 'last_name', 'is_subscribed'
+            'first_name', 'last_name', 'is_subscribed',
+            'recipes', 'recipes_count'
         )
 
     def get_recipes(self, object):
         request = self.context.get('request')
         author_recipes = Recipe.objects.filter(author=object)
-        recipes_limit = request.query_params.get('recipes_limit')
-        if recipes_limit and recipes_limit.isdigit():
-            author_recipes = author_recipes[:int(recipes_limit)]
+        limit = request.query_params.get('recipes_limit')
+        print(limit)
+        if limit and limit.isdigit():
+            author_recipes = author_recipes[:int(limit)]
         return ShortRecipeSerializer(
             author_recipes,
             many=True,
