@@ -21,7 +21,8 @@ class User(AbstractUser):
         unique=True,
         db_index=True,
         validators=[RegexValidator(
-            regex=r'^(?i)(?!.*\bme\b)[\w.@+-]+$',
+            # regex=r'^(?i)(?!.*\bme\b)[\w.@+-]+$',
+            regex=r'^[\w.@+-]+$',
             message='Использованы запрещенные символы '
             'или особо запрещенное имя *me*'
         )]
