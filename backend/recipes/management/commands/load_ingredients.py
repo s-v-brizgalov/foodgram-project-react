@@ -20,3 +20,4 @@ class Command(BaseCommand):
                 except ValueError:
                     print('Несоответствие игнорировано.')
             Ingredient.objects.bulk_create(ingredients)
+            self.stdout.write(self.style.SUCCESS('Ok'))

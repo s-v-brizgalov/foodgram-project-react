@@ -107,12 +107,11 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = '/static/django/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'static'
 
-STATIC_ROOT = '/app/static_django/'
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = '/app/media/'
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / MEDIA_URL
 
 CSV_FILES_DIR = os.path.join(BASE_DIR, 'data')
 
