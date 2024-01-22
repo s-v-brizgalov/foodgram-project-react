@@ -110,7 +110,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static'
 
-MEDIA_URL = 'media/'
+MEDIA_URL = 'https://brizgalov.ru/media/'
 MEDIA_ROOT = BASE_DIR / MEDIA_URL
 
 CSV_FILES_DIR = os.path.join(BASE_DIR, 'data')
