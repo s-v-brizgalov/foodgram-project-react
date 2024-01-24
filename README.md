@@ -81,18 +81,6 @@
 
 **После успешного результата работы workflow зайдите на боевой сервер**
 
-**Примените миграции:**
-
-- sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
-
-**Подгружаем статику:**
-
-- sudo docker-compose exec backend python manage.py collectstatic --no-input
-
-**Заполните базу тестовыми данными об ингредиентах:**
-
-- sudo docker compose -f docker-compose.production.yml exec backend python manage.py load_ingredients
-
 **Создайте суперпользователя:**
 
 - sudo docker compose -f docker-compose.production.yml  exec -it backend python manage.py createsuperuser
